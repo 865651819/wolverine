@@ -16,3 +16,7 @@ pip install html5lib
 pip install requests
 
 pip install flask
+
+pip install Celery
+
+pip install pyvirtualdisplay

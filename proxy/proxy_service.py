@@ -23,4 +23,4 @@ def init():
 
 if __name__ == "__main__":
     init()
-    proxy_service.run()
+    proxy_service.run(host='localhost', port=5002)

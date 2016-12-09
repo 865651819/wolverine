@@ -14,4 +14,4 @@ def user_agent():
 
 
 if __name__ == "__main__":
-    useragent_service.run()
+    useragent_service.run(host='localhost', port=5001)
