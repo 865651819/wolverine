@@ -6,7 +6,7 @@ r = redis.StrictRedis(host='localhost', port=6379)
 
 
 def import_pc_ua():
-    data = get_data(os.path.join(os.getcwd(), 'user_agent/bootstrap/ua-pc.xlsx'))
+    data = get_data(os.path.join(os.getcwd(), 'bootstrap/ua-pc.xlsx'))
 
     start_index = 1
     end_index = 0
@@ -25,7 +25,7 @@ def import_pc_ua():
 
 
 def import_wap_ua():
-    data = get_data(os.path.join(os.getcwd(), 'user_agent/bootstrap/ua-wap.xlsx'))
+    data = get_data(os.path.join(os.getcwd(), 'bootstrap/ua-wap.xlsx'))
 
     start_index = 1
     end_index = 0
@@ -41,3 +41,7 @@ def import_wap_ua():
         start_index = end_index
 
     print(str(end_index) + 'entries stored')
+
+
+if __name__ == '__main__':
+    import_pc_ua()
