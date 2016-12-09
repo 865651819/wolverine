@@ -1,5 +1,4 @@
 import redis
-import json
 from flask import Flask
 
 proxy_service = Flask(__name__)
@@ -11,6 +10,9 @@ STACK = []
 
 @proxy_service.route("/next_proxy")
 def next_proxy():
+    if len(STACK) <= 0:
+        # TODO: add better logic to fix this
+        init()
     return STACK.pop()
 
 
