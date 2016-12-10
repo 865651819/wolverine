@@ -1,16 +1,14 @@
 import requests
 import json
 from random import randint
-import time
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-
+from paws import runner
 
 PROXY_URL = 'http://localhost:5002/next_proxy'
 USER_AGENT_URL = 'http://localhost:5001/useragent'
 
 
-def paw_views(urls):
+def paw_views_py(urls):
     # http://stackoverflow.com/questions/17082425/running-selenium-webdriver-with-a-proxy-in-python
     # Download geckodriver and put it under /use/bin
     fp = webdriver.FirefoxProfile()
@@ -43,6 +41,19 @@ def paw_views(urls):
         driver.close()
 
 
+def paw_view_js(urls):
+    # build proxy
+    # proxy_response = json.loads(requests.get(PROXY_URL).content)['_values']
+    proxy_el = requests.get(PROXY_URL).content.split(':')
+    ip = encode(proxy_el[0])
+    port = encode(proxy_el[1])
+
+    # build user_agent
+    user_agent = encode(requests.get(USER_AGENT_URL).content)
+    view_cmd = runner.construct_pv_cmd(urls=urls, ip=ip, port=port, user_agent=user_agent)
+    print view_cmd
+
+
 def encode(string):
     return string.encode('ascii', 'ignore')
 
@@ -53,7 +64,7 @@ if __name__ == "__main__":
     #        "http",
     #        "119.254.92.52",
     #        "80")
-    paw_views(['http://www.leixp.com/jingdianqingshu/18263.html',
+    paw_view_js(['http://www.leixp.com/jingdianqingshu/18263.html',
                'http://www.leixp.com/jingdianqingshu/18264.html',
                'http://www.leixp.com/jingdianqingshu/18265.html',
                'http://www.leixp.com/jingdianqingshu/18266.html'])
