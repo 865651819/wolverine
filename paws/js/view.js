@@ -1,5 +1,5 @@
 /**
- * click
+ * view
  */
 
 
@@ -13,7 +13,7 @@ var INDEX = 1;
 var urls = casper.cli.args;
 
 function getRandomInt() {
-    return Math.floor(Math.random() * (10000 - 1000)) + 1000;
+    return Math.floor(Math.random() * (10000 - 3000)) + 3000;
 }
 
 casper.start(urls[0]);
@@ -21,22 +21,18 @@ casper.start(urls[0]);
 function nextPage() {
 
     if (INDEX > urls.length) {
-        casper.echo('Complete visiting, exiting...');
         casper.exit();
     }
 
-    casper.thenOpen(urls[INDEX], function() {
-        casper.echo('LINK ' + urls[INDEX]);
+    casper.thenOpen(urls[INDEX], function () {
         INDEX = INDEX + 1;
         var ms = getRandomInt();
-        casper.echo('Waiting ms ' + ms);
         casper.wait(ms, nextPage);
     });
 }
 
 casper.then(function () {
     var ms = getRandomInt();
-    casper.echo('Waiting ms ' + ms);
     casper.wait(ms, nextPage);
 });
 

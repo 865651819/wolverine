@@ -3,11 +3,15 @@
  */
 var casper = require("casper").create({
     webSecurityEnabled: false,
-    verbose: true
+    verbose: true,
+    logLevel: "debug"
 });
 
-
 var links = [];
+
+var myParents = {};
+
+
 function get_links(obj) {
     return obj.evaluate(function () {
         var l = document.querySelectorAll("a"),
@@ -31,22 +35,35 @@ function unique(arr) {
 }
 
 function getLinksFromIframes(callback) {
+
     this.echo("Visit Page: " + this.getCurrentUrl() + "\n");
     function to_frame(obj) {
         var iframes = to_evaluate(obj);
+
+        var parent = obj.getCurrentUrl();
+        console.log('parent is ' + parent);
+
         iframes.forEach(function (index) {
             this.withFrame(index, function () {
                 this.echo(": " + this.getCurrentUrl());
+                var curUrl = this.getCurrentUrl();
                 var l = unique(get_links(this));
-                var i;
-                for (i = 0; i < l.length; i++) {
+                for (var i = 0; i < l.length; i++) {
                     console.log(l[i]);
-                    links.push(l[i])
+                    links.push(l[i]);
                 }
+
+                if (myParents[parent]) {
+                    console.log('existed....');
+                    myParents[parent].push(curUrl);
+                } else {
+                    console.log('new ones');
+                    myParents[parent] = [curUrl];
+                }
+
                 links = unique(links);
-                console.log("");
                 to_frame(this)//multi lvl
-            });//The first iframe
+            }); //The first iframe
         }, obj);
     }
 
@@ -67,17 +84,42 @@ function getLinksFromIframes(callback) {
 }
 
 
-casper.start("http://www.51yrj.com/ad/ggj_51yrj.html", function () {
-    var theLinks = links;
-    getLinksFromIframes.call(this, function () {
-        console.log("Done!\n");
-        var i;
-        for (i = 0; i < links.length; i++) {
-            this.echo("test@" + links[i]);
-        }
-        casper.thenOpen(links[links.length - 1], function () {
-            this.echo('Second Page: ' + this.getTitle());
-            this.exit();
+casper.start("http://www.93959.com/", function () {
+
+    //casper.wait(10000, function() {
+
+        casper.log('wait is done');
+
+        getLinksFromIframes.call(this, function () {
+            console.log("Done!\n");
+            for (var i = 0; i < links.length; i++) {
+                this.echo("test@" + links[i]);
+            }
+
+            console.log("my parents");
+            console.log(Object.keys(myParents));
+            console.log(Object.keys(myParents).length);
+
+            if (Object.keys(myParents)) {
+                for (var key in Object.keys(myParents)) {
+                    console.log("###### " + key);
+                }
+            }
+
+            console.log('###!' + myParents["http://www.93959.com/"]);
+            console.log('size ' + myParents["http://www.93959.com/"].length);
+
+            var l = myParents["http://www.93959.com/"];
+            for (var i=0; i<l.length; ++i) {
+                console.log('````` ' + l[i]);
+            }
+
+            casper.thenOpen(links[links.length - 1], function () {
+                this.echo('Second Page: ' + this.getTitle());
+                this.exit();
+            });
         });
-    });
-}).wait(1000000).run();
+    //});
+
+
+}).run();
