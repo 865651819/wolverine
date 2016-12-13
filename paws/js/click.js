@@ -19,7 +19,7 @@ function get_links(obj) {
         for (var i = 0; i < l.length; i++) {
             l2[i] = l[i].href;
         }
-        return l2
+        return l2;
     });
 }
 
@@ -41,28 +41,52 @@ function getLinksFromIframes(callback) {
         var iframes = to_evaluate(obj);
 
         var parent = obj.getCurrentUrl();
-        console.log('parent is ' + parent);
+        //console.log('parent is ' + parent);
 
         iframes.forEach(function (index) {
             this.withFrame(index, function () {
-                this.echo(": " + this.getCurrentUrl());
+                 this.echo("find iframe : " + this.getCurrentUrl());
                 var curUrl = this.getCurrentUrl();
+                var curLinks = [];
                 var l = unique(get_links(this));
                 for (var i = 0; i < l.length; i++) {
                     console.log(l[i]);
                     links.push(l[i]);
+                    curLinks.push(l[i]);
                 }
 
                 if (myParents[parent]) {
-                    console.log('existed....');
-                    myParents[parent].push(curUrl);
+                    console.log('existed....' + curUrl);
+                    if (myParents[parent].indexOf(curUrl) < 0) {
+                        myParents[parent].push(curUrl);
+                    }
                 } else {
-                    console.log('new ones');
+                    console.log('new ones ' + curUrl);
                     myParents[parent] = [curUrl];
                 }
 
+                if (myParents[curUrl]) {
+                    console.log('existed....');
+                    // myParents[curUrl].concat(curLinks);
+
+
+                    for (var j=0; j<curLinks.length; ++j) {
+                        if (myParents[curUrl].indexOf(curLinks[j]) < 0) {
+                            myParents[curUrl].push(curLinks[j]);
+                            console.log('add new link ' + curLinks[j])
+                        } else {
+                            console.log('!!duplicate');
+                        }
+                    }
+
+
+                } else {
+                    console.log('new ones');
+                    myParents[curUrl] = curLinks;
+                }
+
                 links = unique(links);
-                to_frame(this)//multi lvl
+                to_frame(this); //multi lvl
             }); //The first iframe
         }, obj);
     }
@@ -83,8 +107,38 @@ function getLinksFromIframes(callback) {
     });
 }
 
+function getLinks(iframe_key) {
+    casper.log('current key is ' + iframe_key);
+    var curLinks = myParents[iframe_key];
+    if (!curLinks) {
+        casper.log('I am the leaf node, return');
+        return [];
+    }
+    var links = [];
+    for (var i=0; i<curLinks.length; ++i) {
+        casper.log('add to list and trace child ' + curLinks[i]);
+        links.push(curLinks[i]);
+        //links.concat(getLinks(curLinks[i]));
 
-casper.start("http://www.93959.com/", function () {
+        for (var j=0; j<curLinks.length; ++j) {
+            if (links.indexOf(curLinks[j]) < 0) {
+                links.push(curLinks[j]);
+                console.log('add new link ' + curLinks[j])
+            } else {
+                console.log('!!duplicate');
+            }
+        }
+
+    }
+    casper.log('get all links for this iframe ' + iframe_key)
+    casper.log(links);
+    return links;
+}
+
+
+casper.start('http://www.meifazx.com/a/yuanlian/');
+
+casper.thenOpen("http://www.meifazx.com/a/juanfa/", function () {
 
     //casper.wait(10000, function() {
 
@@ -100,26 +154,63 @@ casper.start("http://www.93959.com/", function () {
             console.log(Object.keys(myParents));
             console.log(Object.keys(myParents).length);
 
-            if (Object.keys(myParents)) {
-                for (var key in Object.keys(myParents)) {
-                    console.log("###### " + key);
+            var ads_by_spot = {}
+
+            console.log("spots!");
+            var spots = myParents['http://www.meifazx.com/a/juanfa/'];
+            console.log(spots.length);
+            console.log(spots);
+
+            for (var i=0; i<spots.length; ++i) {
+                console.log('spot key is ' + spots[i]);
+                ads_by_spot[spots[i]] = getLinks(spots[i]);
+            }
+
+
+            // console.log('###!' + myParents["http://www.93959.com/"]);
+            // console.log('size ' + myParents["http://www.93959.com/"].length);
+
+            // var l = myParents["http://www.93959.com/"];
+            // for (var i=0; i<l.length; ++i) {
+            //     console.log('````` ' + l[i]);
+            // }
+
+            var ads_candidate = [];
+            console.log('find candidates');
+            for (var i=0; i<spots.length; ++i) {
+                var links_for_cur_spot = ads_by_spot[spots[i]];
+                console.log('candidate for spot ' + spots[i]);
+                console.log('links_for_cur_spot ' + links_for_cur_spot);
+                console.log('links_candiate ' + links_for_cur_spot.length);
+                var min = 0;
+                var candidate;
+                for (var j=0; j<links_for_cur_spot.length; ++j) {
+                    console.log('cur link ' + links_for_cur_spot[j]);
+                    console.log('link length ' + links_for_cur_spot[j].length)
+                    if (links_for_cur_spot[j].length >= min) {
+                        candidate = links_for_cur_spot[j];
+                        min = candidate.length;
+                    }
+                }
+                if (candidate) {
+                    console.log('add candidate ' + candidate);
+                    ads_candidate.push(candidate);
                 }
             }
 
-            console.log('###!' + myParents["http://www.93959.com/"]);
-            console.log('size ' + myParents["http://www.93959.com/"].length);
+            console.log('ads candidate ' + ads_candidate.length);
+            console.log(ads_candidate);
 
-            var l = myParents["http://www.93959.com/"];
-            for (var i=0; i<l.length; ++i) {
-                console.log('````` ' + l[i]);
+            for(var k=0; k<ads_candidate.length; ++k) {
+                casper.thenOpen(ads_candidate[k], function () {
+                    this.echo('Second Page: ' + this.getTitle());
+                    this.exit();
+                });
             }
-
-            casper.thenOpen(links[links.length - 1], function () {
-                this.echo('Second Page: ' + this.getTitle());
-                this.exit();
-            });
         });
     //});
 
 
-}).run();
+});
+
+casper.run();

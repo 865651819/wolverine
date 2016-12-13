@@ -64,7 +64,11 @@ if __name__ == "__main__":
     #        "http",
     #        "119.254.92.52",
     #        "80")
-    paw_view_js(['http://www.leixp.com/jingdianqingshu/18263.html',
-               'http://www.leixp.com/jingdianqingshu/18264.html',
-               'http://www.leixp.com/jingdianqingshu/18265.html',
-               'http://www.leixp.com/jingdianqingshu/18266.html'])
+    paw_view_js(['http://www.meifazx.com/a/changfa',
+                 'http://www.meifazx.com/a/duanfa',
+                 'http://www.meifazx.com/a/juanfa',
+                 'http://www.meifazx.com/a/yuanlian',
+                 'http://www.meifazx.com/a/changlian',
+                 'http://www.meifazx.com/a/nanshi',
+                 'http://www.meifazx.com/a/tangfa',
+                 'http://www.meifazx.com/a/liuhai'])

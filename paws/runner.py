@@ -10,7 +10,7 @@ def construct_args(ip, port, user_agent):
                     '--user-agent="%s"' % user_agent,
                     '--ignore-ssl-errors=true'])
     return ' '.join(['--proxy=%s' % (str(ip) + ':' + str(port)),
-                     '--user-agent="%s"' % user_agent,
+                     '--ua="%s"' % user_agent,
                      '--ignore-ssl-errors=true'])
 
 
