@@ -7,6 +7,8 @@ var casper = require("casper").create({
     logLevel: "debug"
 });
 
+casper.userAgent(casper.cli.get('ua'));
+
 var links = [];
 
 var myParents = {};
@@ -34,6 +36,8 @@ function unique(arr) {
     return Object.keys(obj);
 }
 
+var COUNT = 1;
+
 function getLinksFromIframes(callback) {
 
     this.echo("Visit Page: " + this.getCurrentUrl() + "\n");
@@ -41,48 +45,70 @@ function getLinksFromIframes(callback) {
         var iframes = to_evaluate(obj);
 
         var parent = obj.getCurrentUrl();
-        //console.log('parent is ' + parent);
 
         iframes.forEach(function (index) {
             this.withFrame(index, function () {
-                 this.echo("find iframe : " + this.getCurrentUrl());
+                this.echo("find iframe : " + this.getCurrentUrl());
                 var curUrl = this.getCurrentUrl();
+
+                if (curUrl === 'about:blank') {
+                    console.log('my name is about:blank, bad need a new name');
+                    curUrl = 'about:blank' + COUNT;
+                    console.log('my new name is ' + curUrl);
+                    COUNT = COUNT + 1;
+                }
+
                 var curLinks = [];
                 var l = unique(get_links(this));
+                console.log('find these links under the iframe ' + curUrl);
                 for (var i = 0; i < l.length; i++) {
                     console.log(l[i]);
                     links.push(l[i]);
                     curLinks.push(l[i]);
                 }
 
+
                 if (myParents[parent]) {
-                    console.log('existed....' + curUrl);
+                    console.log('parent is already existed....' + parent);
+                    console.log('i am child ' + curUrl);
                     if (myParents[parent].indexOf(curUrl) < 0) {
+                        console.log('parent exists, but does not include me added me! ' + curUrl);
                         myParents[parent].push(curUrl);
                     }
                 } else {
-                    console.log('new ones ' + curUrl);
+                    console.log('my parent does not exist, add both of us! my parent is ' + parent);
+                    console.log('add me as well ' + curUrl);
                     myParents[parent] = [curUrl];
                 }
 
                 if (myParents[curUrl]) {
-                    console.log('existed....');
-                    // myParents[curUrl].concat(curLinks);
+                    console.log('i am already existed....' + curUrl);
 
 
                     for (var j=0; j<curLinks.length; ++j) {
                         if (myParents[curUrl].indexOf(curLinks[j]) < 0) {
+                            console.log('i do not have this link ' + curLinks[j]);
                             myParents[curUrl].push(curLinks[j]);
                             console.log('add new link ' + curLinks[j])
                         } else {
-                            console.log('!!duplicate');
+                            console.log('i already have !!duplicate ' + curLinks[j]);
                         }
                     }
 
 
                 } else {
-                    console.log('new ones');
-                    myParents[curUrl] = curLinks;
+                    console.log('I am not existed, added me ' + curLinks);
+                    console.log('added my child links as well');
+                    myParents[curUrl] = [];
+                    for (var j=0; j<curLinks.length; ++j) {
+                        if (myParents[curUrl].indexOf(curLinks[j]) < 0) {
+                            console.log('i do not have this link ' + curLinks[j]);
+                            myParents[curUrl].push(curLinks[j]);
+                            console.log('add new link ' + curLinks[j])
+                        } else {
+                            console.log('i already have !!duplicate ' + curLinks[j]);
+                        }
+                    }
                 }
 
                 links = unique(links);
@@ -120,10 +146,11 @@ function getLinks(iframe_key) {
         links.push(curLinks[i]);
         //links.concat(getLinks(curLinks[i]));
 
-        for (var j=0; j<curLinks.length; ++j) {
-            if (links.indexOf(curLinks[j]) < 0) {
-                links.push(curLinks[j]);
-                console.log('add new link ' + curLinks[j])
+        var childLinks = getLinks(curLinks[i]);
+        for (var j=0; j<childLinks.length; ++j) {
+            if (links.indexOf(childLinks[j]) < 0) {
+                links.push(childLinks[j]);
+                console.log('add new link ' + childLinks[j])
             } else {
                 console.log('!!duplicate');
             }
@@ -136,9 +163,9 @@ function getLinks(iframe_key) {
 }
 
 
-casper.start('http://www.meifazx.com/a/yuanlian/');
+casper.start('http://www.91txs.net/shehui/quwen/201507/6527.html');
 
-casper.thenOpen("http://www.meifazx.com/a/juanfa/", function () {
+casper.thenOpen("http://www.91txs.net/shehui/tuku/201603/11054.html", function () {
 
     //casper.wait(10000, function() {
 
@@ -150,17 +177,21 @@ casper.thenOpen("http://www.meifazx.com/a/juanfa/", function () {
                 this.echo("test@" + links[i]);
             }
 
-            console.log("my parents");
-            console.log(Object.keys(myParents));
-            console.log(Object.keys(myParents).length);
+            //console.log("my parents");
+            //console.log(Object.keys(myParents));
+            //console.log(Object.keys(myParents).length);
 
             var ads_by_spot = {}
 
-            console.log("spots!");
-            var spots = myParents['http://www.meifazx.com/a/juanfa/'];
-            console.log(spots.length);
+            console.log("we have these spots!!!!");
+            var spots = myParents['http://www.91txs.net/shehui/tuku/201603/11054.html'];
+            console.log("Number is " + str(spots.length));
             console.log(spots);
+            for (var i=0; i<spots.length; ++i) {
+                console.log(spots[i]);
+            }
 
+            console.log("Get links for each spot!!");
             for (var i=0; i<spots.length; ++i) {
                 console.log('spot key is ' + spots[i]);
                 ads_by_spot[spots[i]] = getLinks(spots[i]);
@@ -181,7 +212,7 @@ casper.thenOpen("http://www.meifazx.com/a/juanfa/", function () {
                 var links_for_cur_spot = ads_by_spot[spots[i]];
                 console.log('candidate for spot ' + spots[i]);
                 console.log('links_for_cur_spot ' + links_for_cur_spot);
-                console.log('links_candiate ' + links_for_cur_spot.length);
+                console.log('links_candidate ' + links_for_cur_spot.length);
                 var min = 0;
                 var candidate;
                 for (var j=0; j<links_for_cur_spot.length; ++j) {
@@ -194,7 +225,12 @@ casper.thenOpen("http://www.meifazx.com/a/juanfa/", function () {
                 }
                 if (candidate) {
                     console.log('add candidate ' + candidate);
-                    ads_candidate.push(candidate);
+                    if (ads_candidate.index(candidate) < 0) {
+                        console.log('new candidate, welcome ' + candidate);
+                        ads_candidate.push(candidate);
+                    } else {
+                        console.log('we already have you, bye! ' + candidate);
+                    }
                 }
             }
 
