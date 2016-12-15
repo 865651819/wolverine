@@ -11,20 +11,22 @@ casper.userAgent(casper.cli.get('ua'));
 
 var links = [];
 
-var target = 'http://www.93959.com/'
+var paw_url = 'http://www.91txs.net/tansuo/faming/201607/11930.html'
 
+var SPOTS_COUNT=0;
 
+var links = [];
 function get_links(obj) {
     return obj.evaluate(function () {
-        var l = document.querySelectorAll("a"),
+        var i,
+            l = document.querySelectorAll("a"),
             l2 = [];
-        for (var i = 0; i < l.length; i++) {
+        for (i = 0; i < l.length; i++) {
             l2[i] = l[i].href;
         }
-        return l2;
+        return l2
     });
 }
-
 function unique(arr) {
     var obj = {};
     for (var i = 0; i < arr.length; i++) {
@@ -36,38 +38,33 @@ function unique(arr) {
     return Object.keys(obj);
 }
 
-var SPOTS_COUNT = 0;
-
 function getLinksFromIframes(callback) {
+    this.echo("Here we come: " + this.getCurrentUrl() + "\n");
 
-    this.echo("Visit Page: " + this.getCurrentUrl() + "\n");
+    var parent =this.getCurrentUrl();
+
     function to_frame(obj) {
         var iframes = to_evaluate(obj);
-
-        var parent = obj.getCurrentUrl();
-
         iframes.forEach(function (index) {
             this.withFrame(index, function () {
-                this.echo("find iframe : " + this.getCurrentUrl());
+                this.echo("We are here: " + this.getCurrentUrl());
 
-                if (parent === target) {
-                    console.log('find new spot ' + this.getCurrentUrl());
+                if (parent === paw_url) {
                     SPOTS_COUNT = SPOTS_COUNT + 1;
                 }
 
                 var l = unique(get_links(this));
-                for (var i = 0; i < l.length; i++) {
-                    console.log('find the link ' + l[i]);
-                    if (links.indexOf(l[i]) < 0) {
-                        links.push(l[i]);
-                    }
+                var i;
+                for (i = 0; i < l.length; i++) {
+                    console.log(l[i]);
+                    links.push(l[i])
                 }
                 links = unique(links);
-                to_frame(this);
-            });
+                console.log("");
+                to_frame(this) //multi lvl
+            }); //The first iframe
         }, obj);
     }
-
     function to_evaluate(obj) {
         return obj.evaluate(function () {
             var iframes = [];
@@ -77,7 +74,6 @@ function getLinksFromIframes(callback) {
             return iframes;
         })
     }
-
     to_frame(this);
     this.then(function () {
         callback.call(this);
@@ -87,7 +83,7 @@ function getLinksFromIframes(callback) {
 
 //casper.start('http://www.91txs.net/shehui/quwen/201507/6527.html');
 
-casper.start("http://www.93959.com/", function () {
+casper.start(paw_url, function () {
 
     //casper.wait(10000, function() {
 
