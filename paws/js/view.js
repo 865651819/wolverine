@@ -1,8 +1,6 @@
 /**
- * view
+ * This is used to walk pages.
  */
-
-
 var casper = require("casper").create({
     webSecurityEnabled: false,
     verbose: true,
@@ -10,7 +8,7 @@ var casper = require("casper").create({
 });
 
 casper.userAgent(casper.cli.get('ua'));
-casper.log('ua is nidaye ' + casper.cli.get('ua'))
+
 
 var INDEX = 1;
 var urls = casper.cli.args;
