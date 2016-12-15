@@ -11,12 +11,14 @@ var casper = require("casper").create({
 // @Required
 // Set user agent by passing argument --ua
 casper.userAgent(casper.cli.get('ua'));
+casper.log('useragent ' + casper.cli.get('ua'), 'debug');
 
 
 // @Required
 var urls = casper.cli.args;
 var ads_page = urls[urls.length - 1];
-
+casper.log('urls ' + urls, 'debug');
+casper.log('ads ' + ads_page, 'debug');
 
 // The count of ads window in the page
 var SPOTS_COUNT = 0;
