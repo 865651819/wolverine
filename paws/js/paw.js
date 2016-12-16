@@ -11,20 +11,15 @@ var casper = require("casper").create({
 // @Required
 // Set user agent by passing argument --ua
 casper.userAgent(casper.cli.get('ua'));
-casper.log('useragent ' + casper.cli.get('ua'), 'debug');
 
 
 // @Required
-var urls = casper.cli.args;
-var ads_page = urls[urls.length - 1];
-casper.log('urls ' + urls, 'debug');
-casper.log('ads ' + ads_page, 'debug');
+var ads_page = casper.cli.args[0];
+casper.log('ads_page is ' + ads_page, 'debug');
+
 
 // The count of ads window in the page
 var SPOTS_COUNT = 0;
-
-
-var INDEX = 1;
 
 
 // All ads(or not) links
@@ -100,59 +95,39 @@ function getLinksFromIframes(callback) {
     });
 }
 
-function getRandomInt() {
-    return Math.floor(Math.random() * (10000 - 3000)) + 3000;
-}
 
-casper.start(urls[0], function() {
-    INDEX = INDEX + 1;
-    var ms = getRandomInt();
-    casper.wait(ms, nextPage);
-});
+casper.start(ads_page, function () {
+    casper.log('Get all ads candidate and click candidates ' + ads_page, "info");
+    getLinksFromIframes.call(this, function () {
+        /*
+         casper.log("Done!\n", "debug");
+         casper.log('found spots [' + SPOTS_COUNT + ']', "debug");
+         for (var i = 0; i < links.length; i++) {
+         casper.log("candidate@" + i + ' ' + links[i], "debug");
+         }
+         casper.log('find candidates', "debug");
+         */
 
-function nextPage() {
+        // Get ads link candidates
+        var target_count = links.length > SPOTS_COUNT ? SPOTS_COUNT : links.length;
+        links.sort(function (a, b) {
+            return b.length - a.length;
+        });
+        var ads_candidate = links.slice(0, target_count);
 
-    if (INDEX == urls.length) {
-        casper.thenOpen(ads_page, function () {
-            casper.log('Get all ads candidate and click candidates ' + ads_page, "info");
-            getLinksFromIframes.call(this, function () {
+        // Debugging purpose
+        for (var i = 0; i < ads_candidate.length; ++i) {
+            casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
+        }
 
-                 casper.log("Done!\n", "debug");
-                 casper.log('found spots [' + SPOTS_COUNT + ']', "debug");
-                 for (var i = 0; i < links.length; i++) {
-                 casper.log("candidate@" + i + ' ' + links[i], "debug");
-                 }
-                 casper.log('find candidates', "debug");
-
-
-                // Get ads link candidates
-                var target_count = links.length > SPOTS_COUNT ? SPOTS_COUNT : links.length;
-                links.sort(function (a, b) {
-                    return b.length - a.length;
-                });
-                var ads_candidate = links.slice(0, target_count);
-
-                // Debugging purpose
-                for (var i = 0; i < ads_candidate.length; ++i) {
-                    casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
-                }
-
-                casper.each(ads_candidate, function (self, url) {
-                    self.thenOpen(url, function () {
-                        casper.log('Clicking the ad ' + url, 'info');
-                        casper.log('Second Page: ' + this.getTitle(), "info");
-                    });
-                });
+        casper.each(ads_candidate, function (self, url) {
+            self.thenOpen(url, function () {
+                casper.log('Clicking the ad ' + url, 'info');
+                casper.log('Second Page: ' + this.getTitle(), "info");
             });
         });
-    } else {
-        casper.log('visit next page ' + urls[INDEX]);
-        casper.thenOpen(urls[INDEX], function () {
-            INDEX = INDEX + 1;
-            var ms = getRandomInt();
-            casper.wait(ms, nextPage);
-        });
-    }
-}
+    });
+});
+
 
 casper.run();
