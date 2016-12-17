@@ -27,6 +27,14 @@ def construct_pv_and_click_cmd(urls, ip, port, user_agent):
     return 'casperjs' + ' ' + PV_CLICK_PATH + ' ' + ' '.join(urls) + ' ' + construct_args(ip, port, user_agent)
 
 
+def pv():
+    pass
+
+
+def pv_click():
+    pass
+
+
 if __name__ == '__main__':
     urls = ['http://www.leixp.com/jingdianqingshu/18263.html',
             'http://www.leixp.com/jingdianqingshu/18264.html',

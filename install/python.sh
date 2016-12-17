@@ -20,3 +20,11 @@ pip install flask
 pip install Celery
 
 pip install pyvirtualdisplay
+
+pip install chronos-python
+
+pip install schedule
+
+
+cd wolverine
+celery -A paws worker --app=paws.task_queue --loglevel=info
