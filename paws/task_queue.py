@@ -11,13 +11,13 @@ app = Celery('wolverine', broker='redis://localhost')
 
 @app.task(name='page view')
 def pv():
-    logger.info('new pv task' + datetime.datetime.now())
+    logger.info('new pv task')
     runner.pv()
 
 
 @app.task(name='page view with ads click')
 def click():
-    logger.info('new click task' + datetime.datetime.now())
+    logger.info('new click task')
     runner.pv_click()
 
 

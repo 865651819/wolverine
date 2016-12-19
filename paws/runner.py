@@ -4,6 +4,8 @@ PV_PATH = os.path.join(os.getcwd(), 'js/view.js')
 PV_CLICK_PATH = os.path.join(os.getcwd(), 'js/click.js')
 COOKIES_PATH = '/etc/nightmare'
 
+CNT = 0;
+
 
 def construct_args(ip, port, user_agent):
     print ' '.join(['--proxy=%s' % (str(ip) + ':' + str(port)),
@@ -28,11 +30,15 @@ def construct_pv_and_click_cmd(urls, ip, port, user_agent):
 
 
 def pv():
-    pass
+    global CNT
+    CNT += 1
+    print CNT
 
 
 def pv_click():
-    pass
+    global CNT
+    CNT += 1
+    print CNT
 
 
 if __name__ == '__main__':
