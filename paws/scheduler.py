@@ -1,7 +1,9 @@
 import schedule
 import threading
+import datetime
 from task_queue import pv, click
 
+ACCESS_PCT = []
 
 def pv_jobs_per_sec():
     print 'pv_jobs_per_sec'

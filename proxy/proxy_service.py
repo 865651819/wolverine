@@ -1,5 +1,5 @@
 import redis
-from flask import Flask
+from flask import Flask, request
 
 proxy_service = Flask(__name__)
 
@@ -10,6 +10,10 @@ STACK = []
 
 @proxy_service.route("/next_proxy")
 def next_proxy():
+
+    start = request.args.get('start')
+    limit = request.args.get('limit')
+
     if len(STACK) <= 0:
         # TODO: add better logic to fix this
         init()

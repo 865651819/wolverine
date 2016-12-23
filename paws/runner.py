@@ -1,4 +1,5 @@
 import os
+from multiprocessing import Pool
 
 PV_PATH = os.path.join(os.getcwd(), 'js/view.js')
 PV_CLICK_PATH = os.path.join(os.getcwd(), 'js/click.js')
@@ -42,10 +43,7 @@ def pv_click():
 
 
 if __name__ == '__main__':
-    urls = ['http://www.leixp.com/jingdianqingshu/18263.html',
-            'http://www.leixp.com/jingdianqingshu/18264.html',
-            'http://www.leixp.com/jingdianqingshu/18265.html',
-            'http://www.leixp.com/jingdianqingshu/18266.html']
-    cmd = construct_pv_cmd(urls, '101.11.11.11', 90,
-                           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36')
-    print cmd
+    # start 100 worker processes
+    pool = Pool(processes=100)
+
+
