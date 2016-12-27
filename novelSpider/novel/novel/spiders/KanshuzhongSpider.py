@@ -12,7 +12,7 @@ SITE_URL = 'http://www.unionchina.top/novel'
 class KanshuzhongSpider(scrapy.Spider):
     name = 'kanshuzhong'
 
-    start_urls = ['http://www.kanshuzhong.com/book/87102/']
+    start_urls = ['http://www.kanshuzhong.com/book/23729/']
     id = 3
 
     def parse(self, response):
@@ -36,24 +36,32 @@ class KanshuzhongSpider(scrapy.Spider):
         chapter_idx = 0
         for el in chapter_els:
 
-            link = self.start_urls[0] + el.xpath('a/@href').extract()[0]
+            try:
+                link = self.start_urls[0] + el.xpath('a/@href').extract()[0]
+                print link
 
-            chapter = {
-                'title': el.xpath('a/text()').extract()[0].encode('utf-8'),
-                'link': SITE_URL + '/' + str(self.id) + '/' + str(chapter_idx)
-            }
-            # c = chapter['title'] + ' ' + chapter['link']
-            # print c.encode('utf-8')
-            # print "\n"
-            chapters.append(chapter)
-            if chapter_idx == 2 or chapter_idx == 3:
-                yield Request(url=link,
-                              callback=self.content_parse,
-                              meta={
-                                'chapter_index': str(chapter_idx),
-                                'novel_id': str(self.id),
-                                'chapter_title': chapter['title']})
-            chapter_idx += 1
+                chapter = {
+                    'title': el.xpath('a/text()').extract()[0].encode('utf-8'),
+                    'link': SITE_URL + '/' + str(self.id) + '/' + str(chapter_idx)
+                }
+                # c = chapter['title'] + ' ' + chapter['link']
+                # print c.encode('utf-8')
+                # print "\n"
+                chapters.append(chapter)
+                if chapter_idx == 2 or chapter_idx == 3:
+                    yield Request(url=link,
+                                  callback=self.content_parse,
+                                  meta={
+                                      'chapter_index': str(chapter_idx),
+                                      'novel_id': str(self.id),
+                                      'chapter_title': chapter['title']})
+                chapter_idx += 1
+
+            except:
+                print 'Parsing failed.'
+                print el
+                raise
+                pass
 
         cur_novel = {
             'title': title,
@@ -71,7 +79,7 @@ class KanshuzhongSpider(scrapy.Spider):
         contents = response.selector.xpath('//div[@class="textcontent"]/text()').extract()
         res = ""
         for c in contents:
-            res += c.encode('utf-8')
+            res += c.encode('utf-8')gi
         print res
         r.set('novel:' + novel_id + ':' + chapter_index, {
             'novel_id': novel_id,
