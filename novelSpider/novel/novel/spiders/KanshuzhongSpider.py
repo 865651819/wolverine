@@ -1,5 +1,6 @@
 import scrapy
 import redis
+import urllib
 from scrapy.http import Request
 from scrapy.selector import HtmlXPathSelector
 
@@ -20,17 +21,24 @@ class KanshuzhongSpider(scrapy.Spider):
         category = response.xpath('//div[@class="top_left"]/a/text()').extract()[1]
         print category
 
+
+        avator = response.xpath('//div[@class="readtip"]//img/@src').extract()
+        print avator
+        urllib.urlretrieve(avator[0], str(self.id) + '.jpg')
+
+
         summary = response.xpath('//div[@class="readtip"]')[0]
         #print summary
 
-        print [summary.xpath('''.//div/node()[count(preceding-sibling::br)=%d]
-                           [not(self::br)]''' % i).extract()
-               for i in range(0, len(summary.xpath('.//div/br')) + 1)][0]
+        #print [summary.xpath('''.//div/node()[count(preceding-sibling::br)=%d]
+        #                   [not(self::br)]''' % i).extract()
+        #       for i in range(0, len(summary.xpath('.//div/br')) + 1)][0]
 
         chapter_els = response.xpath('//div[@class="bookcontent"]/dl/dd')
 
         chapters = []
 
+        chapter_idx = 0
         for el in chapter_els:
             chapter = {
                 'title': el.xpath('a/text()').extract()[0].encode('utf-8'),
@@ -40,8 +48,13 @@ class KanshuzhongSpider(scrapy.Spider):
             # print c.encode('utf-8')
             # print "\n"
             chapters.append(chapter)
-
-        # yield Request(url=chapters[1]['link'], callback=self.content_parse)
+            if chapter_idx == 2 or chapter_idx == 3:
+                yield Request(url=chapter['link'],
+                              callback=self.content_parse,
+                              meta={
+                                'chapter_index': str(chapter_idx),
+                                'novel_id': str(self.id)})
+            chapter_idx += 1
 
         cur_novel = {
             'title': title,
@@ -51,8 +64,11 @@ class KanshuzhongSpider(scrapy.Spider):
         r.set('novel:' + str(self.id), cur_novel)
 
     def content_parse(self, response):
+        chapter_index = response.meta.get('chapter_index')
+        novel_id = response.meta.get('novel_id')
         contents = response.selector.xpath('//div[@class="textcontent"]/text()').extract()
         res = ""
         for c in contents:
             res += c.encode('utf-8')
         print res
+        r.set('novel:' + novel_id + ':' + chapter_index, res)
