@@ -79,7 +79,7 @@ class KanshuzhongSpider(scrapy.Spider):
         contents = response.selector.xpath('//div[@class="textcontent"]/text()').extract()
         res = ""
         for c in contents:
-            res += c.encode('utf-8')gi
+            res += c.encode('utf-8')
         print res
         r.set('novel:' + novel_id + ':' + chapter_index, {
             'novel_id': novel_id,
