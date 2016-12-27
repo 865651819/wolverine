@@ -6,58 +6,59 @@ from scrapy.selector import HtmlXPathSelector
 
 r = redis.StrictRedis(host='localhost', port=6379)
 
+SITE_URL = 'http://www.unionchina.top/novel'
+
 
 class KanshuzhongSpider(scrapy.Spider):
     name = 'kanshuzhong'
 
     start_urls = ['http://www.kanshuzhong.com/book/87102/']
-    id = 1
+    id = 3
 
     def parse(self, response):
 
+        # Parse novel's title
         title = response.xpath('//div[@class="book_title"]//h1/text()').extract()[0]
         print title.encode('utf-8')
 
+        # Parse novel's category
         category = response.xpath('//div[@class="top_left"]/a/text()').extract()[1]
-        print category
 
-
+        # download image
         avator = response.xpath('//div[@class="readtip"]//img/@src').extract()
-        print avator
         urllib.urlretrieve(avator[0], str(self.id) + '.jpg')
 
-
-        summary = response.xpath('//div[@class="readtip"]')[0]
-        #print summary
-
-        #print [summary.xpath('''.//div/node()[count(preceding-sibling::br)=%d]
-        #                   [not(self::br)]''' % i).extract()
-        #       for i in range(0, len(summary.xpath('.//div/br')) + 1)][0]
-
+        # Parse chapters
         chapter_els = response.xpath('//div[@class="bookcontent"]/dl/dd')
 
         chapters = []
 
         chapter_idx = 0
         for el in chapter_els:
+
+            link = self.start_urls[0] + el.xpath('a/@href').extract()[0]
+
             chapter = {
                 'title': el.xpath('a/text()').extract()[0].encode('utf-8'),
-                'link': self.start_urls[0] + el.xpath('a/@href').extract()[0]
+                'link': SITE_URL + '/' + str(self.id) + '/' + str(chapter_idx)
             }
             # c = chapter['title'] + ' ' + chapter['link']
             # print c.encode('utf-8')
             # print "\n"
             chapters.append(chapter)
             if chapter_idx == 2 or chapter_idx == 3:
-                yield Request(url=chapter['link'],
+                yield Request(url=link,
                               callback=self.content_parse,
                               meta={
                                 'chapter_index': str(chapter_idx),
-                                'novel_id': str(self.id)})
+                                'novel_id': str(self.id),
+                                'chapter_title': chapter['title']})
             chapter_idx += 1
 
         cur_novel = {
             'title': title,
+            'id': self.id,
+            'category': category,
             'chapters': chapters
         }
 
@@ -66,9 +67,15 @@ class KanshuzhongSpider(scrapy.Spider):
     def content_parse(self, response):
         chapter_index = response.meta.get('chapter_index')
         novel_id = response.meta.get('novel_id')
+        chapter_title = response.meta.get('chapter_title')
         contents = response.selector.xpath('//div[@class="textcontent"]/text()').extract()
         res = ""
         for c in contents:
             res += c.encode('utf-8')
         print res
-        r.set('novel:' + novel_id + ':' + chapter_index, res)
+        r.set('novel:' + novel_id + ':' + chapter_index, {
+            'novel_id': novel_id,
+            'chapter_index': chapter_index,
+            'content': res,
+            'chapter_title': chapter_title
+        })
