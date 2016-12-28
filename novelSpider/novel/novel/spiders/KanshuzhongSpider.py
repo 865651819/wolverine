@@ -12,8 +12,8 @@ SITE_URL = 'http://www.unionchina.top/novel'
 class KanshuzhongSpider(scrapy.Spider):
     name = 'kanshuzhong'
 
-    start_urls = ['http://www.kanshuzhong.com/book/23729/']
-    id = 3
+    start_urls = ['http://www.kanshuzhong.com/book/92701/']
+    id = 6
 
     def parse(self, response):
 
@@ -23,6 +23,7 @@ class KanshuzhongSpider(scrapy.Spider):
 
         # Parse novel's category
         category = response.xpath('//div[@class="top_left"]/a/text()').extract()[1]
+        print category
 
         # download image
         avator = response.xpath('//div[@class="readtip"]//img/@src').extract()
@@ -36,6 +37,9 @@ class KanshuzhongSpider(scrapy.Spider):
         chapter_idx = 0
         for el in chapter_els:
 
+            if chapter_idx > 100:
+                break
+
             try:
                 link = self.start_urls[0] + el.xpath('a/@href').extract()[0]
                 print link
@@ -48,13 +52,12 @@ class KanshuzhongSpider(scrapy.Spider):
                 # print c.encode('utf-8')
                 # print "\n"
                 chapters.append(chapter)
-                if chapter_idx == 2 or chapter_idx == 3:
-                    yield Request(url=link,
-                                  callback=self.content_parse,
-                                  meta={
-                                      'chapter_index': str(chapter_idx),
-                                      'novel_id': str(self.id),
-                                      'chapter_title': chapter['title']})
+                yield Request(url=link,
+                              callback=self.content_parse,
+                              meta={
+                                  'chapter_index': str(chapter_idx),
+                                  'novel_id': str(self.id),
+                                  'chapter_title': chapter['title']})
                 chapter_idx += 1
 
             except:
@@ -80,7 +83,7 @@ class KanshuzhongSpider(scrapy.Spider):
         res = ""
         for c in contents:
             res += c.encode('utf-8')
-        print res
+        print 'parsed' + str(chapter_index)
         r.set('novel:' + novel_id + ':' + chapter_index, {
             'novel_id': novel_id,
             'chapter_index': chapter_index,
