@@ -28,3 +28,5 @@ pip install schedule
 
 cd wolverine
 celery -A paws worker --app=paws.task_queue --loglevel=info
+
+pip install pymongo

@@ -1,10 +1,14 @@
 import scrapy
 import redis
 import urllib
+from pymongo import MongoClient
 from scrapy.http import Request
 from scrapy.selector import HtmlXPathSelector
 
-r = redis.StrictRedis(host='localhost', port=6379)
+r = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
+
+mongo_client = MongoClient("mongodb://localhost:27017")
+db = mongo_client.wolverine
 
 SITE_URL = 'http://www.unionchina.top/novel'
 
@@ -12,14 +16,14 @@ SITE_URL = 'http://www.unionchina.top/novel'
 class KanshuzhongSpider(scrapy.Spider):
     name = 'kanshuzhong'
 
-    start_urls = ['http://www.kanshuzhong.com/book/92701/']
-    id = 6
+    start_urls = ['http://www.kanshuzhong.com/book/104416/']
+    id = 45
 
     def parse(self, response):
 
         # Parse novel's title
         title = response.xpath('//div[@class="book_title"]//h1/text()').extract()[0]
-        print title.encode('utf-8')
+        print title
 
         # Parse novel's category
         category = response.xpath('//div[@class="top_left"]/a/text()').extract()[1]
@@ -28,6 +32,9 @@ class KanshuzhongSpider(scrapy.Spider):
         # download image
         avator = response.xpath('//div[@class="readtip"]//img/@src').extract()
         urllib.urlretrieve(avator[0], str(self.id) + '.jpg')
+
+        nodes = response.xpath('//div[@class="readtip"]/node()').extract()
+        summary = nodes[5]
 
         # Parse chapters
         chapter_els = response.xpath('//div[@class="bookcontent"]/dl/dd')
@@ -45,8 +52,8 @@ class KanshuzhongSpider(scrapy.Spider):
                 print link
 
                 chapter = {
-                    'title': el.xpath('a/text()').extract()[0].encode('utf-8'),
-                    'link': SITE_URL + '/' + str(self.id) + '/' + str(chapter_idx)
+                    "title": str((el.xpath('a/text()').extract()[0]).encode('utf-8')),
+                    "index": str(chapter_idx)
                 }
                 # c = chapter['title'] + ' ' + chapter['link']
                 # print c.encode('utf-8')
@@ -55,9 +62,9 @@ class KanshuzhongSpider(scrapy.Spider):
                 yield Request(url=link,
                               callback=self.content_parse,
                               meta={
-                                  'chapter_index': str(chapter_idx),
-                                  'novel_id': str(self.id),
-                                  'chapter_title': chapter['title']})
+                                  "chapter_index": chapter_idx,
+                                  "novel_id": self.id,
+                                  "chapter_title": chapter['title']})
                 chapter_idx += 1
 
             except:
@@ -67,13 +74,13 @@ class KanshuzhongSpider(scrapy.Spider):
                 pass
 
         cur_novel = {
-            'title': title,
-            'id': self.id,
-            'category': category,
-            'chapters': chapters
+            "title": title.encode('utf-8'),
+            "id": self.id,
+            "category": category.encode('utf-8'),
+            "chapters": chapters,
+            "summary": summary
         }
-
-        r.set('novel:' + str(self.id), cur_novel)
+        db.novels.insert_one(cur_novel)
 
     def content_parse(self, response):
         chapter_index = response.meta.get('chapter_index')
@@ -82,11 +89,12 @@ class KanshuzhongSpider(scrapy.Spider):
         contents = response.selector.xpath('//div[@class="textcontent"]/text()').extract()
         res = ""
         for c in contents:
-            res += c.encode('utf-8')
+            res += str(c.encode('utf-8'))
         print 'parsed' + str(chapter_index)
-        r.set('novel:' + novel_id + ':' + chapter_index, {
-            'novel_id': novel_id,
-            'chapter_index': chapter_index,
-            'content': res,
-            'chapter_title': chapter_title
+
+        db.chapters.insert_one({
+            "novel_id": novel_id,
+            "chapter_index": chapter_index,
+            "content": res,
+            "title": chapter_title
         })
