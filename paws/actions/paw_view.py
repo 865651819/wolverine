@@ -7,6 +7,7 @@ from paws import runner
 PROXY_URL = 'http://localhost:5002/next_proxy'
 USER_AGENT_URL = 'http://localhost:5001/useragent'
 
+# @deprecated
 
 def paw_views_py(urls):
     # http://stackoverflow.com/questions/17082425/running-selenium-webdriver-with-a-proxy-in-python
