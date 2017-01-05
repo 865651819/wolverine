@@ -1,5 +1,6 @@
 /**
  * Created by jinwang on 12/9/16.
+ * @deprecated
  */
 var casper = require("casper").create({
     webSecurityEnabled: false,

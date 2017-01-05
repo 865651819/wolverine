@@ -2,7 +2,7 @@ import os
 from multiprocessing import Pool
 
 PV_PATH = os.path.join(os.getcwd(), 'js/view.js')
-PV_CLICK_PATH = os.path.join(os.getcwd(), 'js/click.js')
+PV_CLICK_PATH = os.path.join(os.getcwd(), 'js/paw.js')
 COOKIES_PATH = '/etc/nightmare'
 
 CNT = 0
