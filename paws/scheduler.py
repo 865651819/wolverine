@@ -1,7 +1,14 @@
 import schedule
 import threading
+import redis
+import settings
 import datetime
+import math
+import urllib2
+
 from task_queue import pv, click
+
+r = redis.StrictRedis(host='localhost', port=6379)
 
 ACCESS_PCT = [
     4.23,
@@ -30,23 +37,28 @@ ACCESS_PCT = [
     4.6]
 
 
-def pv_jobs_per_sec():
+def jobs_per_sec():
     print 'pv_jobs_per_sec'
-    jobs_to_create = 20
+
+    # Get current hour of the day
+    hour = datetime.datetime.today().hour
+
+    # Get target for current day
+    jobs_to_create = 0
+    try:
+        jobs_to_create = int(math.ceil((r.get(settings.TASKS_TOTAL) * (ACCESS_PCT[hour] / 100)) / 3600))
+    except:
+        jobs_to_create = 10
+
+    print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
+
+    ua_candiates = urllib2.urlopen(settings.PROXY_SERVICE_URL)
+
     for i in range(0, jobs_to_create):
         pv.apply_async()
 
 
-def click_job(count):
-    click.apply_async()
-
-
-def run_threaded(job_func):
-    job_thread = threading.Thread(target=job_func)
-    job_thread.start()
-
-
-schedule.every(1).seconds.do(pv_jobs_per_sec)
+schedule.every(1).seconds.do(jobs_per_sec)
 
 while 1:
     schedule.run_pending()
