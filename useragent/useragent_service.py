@@ -1,6 +1,7 @@
-from random import randint
-import redis
 import json
+from random import randint
+
+import redis
 from flask import Flask
 
 useragent_service = Flask(__name__)

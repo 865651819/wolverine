@@ -1,9 +1,9 @@
-import scrapy
-import redis
 import urllib
+
+import redis
+import scrapy
 from pymongo import MongoClient
 from scrapy.http import Request
-from scrapy.selector import HtmlXPathSelector
 
 r = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
 

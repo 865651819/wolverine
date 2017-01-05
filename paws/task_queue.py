@@ -1,8 +1,9 @@
+import datetime
+
 from celery import Celery
 from celery.utils.log import get_task_logger
-import datetime
-import runner
 
+import runner
 
 logger = get_task_logger(__name__)
 

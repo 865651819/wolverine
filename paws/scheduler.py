@@ -1,11 +1,12 @@
-import schedule
-import json
-import redis
-import settings
 import datetime
+import json
 import math
 import urllib2
 
+import redis
+import schedule
+
+import settings
 from task_queue import pv, click
 
 r = redis.StrictRedis(host='localhost', port=6379)
@@ -55,8 +56,11 @@ def jobs_per_sec():
     ua_candiates = json.loads(urllib2.urlopen(url=settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
     proxy_candidates = json.loads(urllib2.urlopen(url=settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
-    for i in range(0, jobs_to_create):
-        pv.apply_async()
+    for i in range(1, jobs_to_create):
+        if i % 5 == 0:
+            click.apply_sync()
+        else:
+            pv.apply_async()
 
 
 schedule.every(1).seconds.do(jobs_per_sec)

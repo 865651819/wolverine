@@ -1,8 +1,8 @@
-import redis
 import Queue
-import urllib2
 import json
-from flask import Flask, request
+
+import redis
+from flask import Flask
 
 proxy_service = Flask(__name__)
 
