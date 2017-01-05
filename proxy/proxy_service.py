@@ -1,30 +1,36 @@
 import redis
+import Queue
+import urllib2
+import json
 from flask import Flask, request
 
 proxy_service = Flask(__name__)
 
 r = redis.StrictRedis(host='localhost', port=6379)
-
-STACK = []
-
-
-@proxy_service.route("/proxy")
-def next_proxy():
-
-    start = request.args.get('start')
-    limit = request.args.get('limit')
-
-    if len(STACK) <= 0:
-        # TODO: add better logic to fix this
-        init()
-    return STACK.pop()
+q = Queue.Queue()
 
 
-def init():
-    for key in r.scan_iter('proxy:*'):
-        STACK.append(r.get(key))
+@proxy_service.route("/proxy/<int:amount>")
+def proxy(amount):
+    # if queue's size is smaller than requested amount, which means we need ask vendor to get more ips
+    if q.qsize() < amount:
+        # @TODO: use api provided by vendor
+        # new_proxies = urllib2.open('')
+        new_proxies = ['localhost1', 'localhost2']
+
+        # Reuse new proxies for 5 times
+        reuse = 5
+        while reuse > 0:
+            reuse -= 1
+            for new_proxy in new_proxies:
+                q.put(new_proxy)
+
+    proxies = []
+    while amount > 0:
+        proxies.append(q.get())
+        amount -= 1
+    return json.dumps(proxies)
 
 
 if __name__ == "__main__":
-    init()
     proxy_service.run(host='localhost', port=5002)
