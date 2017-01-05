@@ -1,5 +1,5 @@
 import schedule
-import threading
+import json
 import redis
 import settings
 import datetime
@@ -52,7 +52,7 @@ def jobs_per_sec():
 
     print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
 
-    ua_candiates = urllib2.urlopen(settings.PROXY_SERVICE_URL)
+    ua_candiates = json.loads(urllib2.urlopen(url=settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
     for i in range(0, jobs_to_create):
         pv.apply_async()

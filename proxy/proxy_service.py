@@ -8,7 +8,7 @@ r = redis.StrictRedis(host='localhost', port=6379)
 STACK = []
 
 
-@proxy_service.route("/next_proxy")
+@proxy_service.route("/proxy")
 def next_proxy():
 
     start = request.args.get('start')
