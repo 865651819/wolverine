@@ -73,10 +73,11 @@ def jobs_per_sec():
     print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
 
     # Get user agent candidates
-    ua_candidates = json.loads(urllib2.urlopen(url=settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
+    print settings.USERAGENT_SERVICE_URL + str(jobs_to_create)
+    ua_candidates = json.load(urllib2.urlopen(settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
 
     # Get proxy candidates
-    proxy_candidates = json.loads(urllib2.urlopen(url=settings.PROXY_SERVICE_URL + str(jobs_to_create)))
+    proxy_candidates = json.load(urllib2.urlopen(settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
     # Get url candidates
     group = []
@@ -93,25 +94,26 @@ def jobs_per_sec():
         # A hidden condition here is limit + start <= 100
         while counter < limit:
             urls.append(settings.SITE_URL.format(str(novel_id), str(chapter_start + counter)))
+            counter += 1
         group.append(urls)
         amount -= 1
 
     # Generate concrete tasks
     for i in range(1, jobs_to_create):
         if i % 5 == 0:
-            click.apply_sync({
-                'url': settings.SITE_HOME_PAGE,
-                'ip': proxy_candidates[i - 1],
-                'port': proxy_candidates[i - 1],
-                'user_agent': ua_candidates[i - 1]
-            })
+            '''
+            click.apply_sync((
+                settings.SITE_HOME_PAGE,
+                proxy_candidates[i - 1],
+                proxy_candidates[i - 1],
+                ua_candidates[i - 1])
+            )
+            '''
         else:
-            pv.apply_async({
-                'urls': group[i - 1],
-                'ip': proxy_candidates[i - 1],
-                'port': proxy_candidates[i - 1],
-                'user_agent': ua_candidates[i - 1]
-            })
+            pv.apply_async((group[i - 1],
+                           proxy_candidates[i - 1],
+                           proxy_candidates[i - 1],
+                           ua_candidates[i - 1]))
 
 
 schedule.every(1).seconds.do(jobs_per_sec)
