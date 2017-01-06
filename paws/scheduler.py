@@ -68,7 +68,7 @@ def jobs_per_sec():
     try:
         jobs_to_create = int(math.ceil((r.get(settings.TASKS_TOTAL) * (ACCESS_PCT[hour] / 100)) / 3600))
     except:
-        jobs_to_create = 10
+        jobs_to_create = 5
 
     print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
 

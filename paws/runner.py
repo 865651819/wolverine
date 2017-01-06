@@ -1,18 +1,19 @@
 import os
+import subprocess
 from multiprocessing import Pool
 
-PV_PATH = os.path.join(os.getcwd(), 'js/view.js')
-PV_CLICK_PATH = os.path.join(os.getcwd(), 'js/paw.js')
+PV_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js/view.js')
+PV_CLICK_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js/paw.js')
 COOKIES_PATH = '/etc/nightmare'
 
 CNT = 0
 
 
 def construct_args(ip, port, user_agent):
-    print ' '.join(['--proxy=%s' % (str(ip) + ':' + str(port)),
+    print ' '.join([#'--proxy=%s' % (str(ip) + ':' + str(port)),
                     '--user-agent="%s"' % user_agent,
                     '--ignore-ssl-errors=true'])
-    return ' '.join(['--proxy=%s' % (str(ip) + ':' + str(port)),
+    return ' '.join([#'--proxy=%s' % (str(ip) + ':' + str(port)),
                      '--ua="%s"' % user_agent,
                      '--ignore-ssl-errors=true'])
 
@@ -44,8 +45,9 @@ def pv_click():
     return CNT
 
 
-def run():
-    pass
+def run(cmd):
+    p = subprocess.call(cmd, shell=True)
+    print p
 
 
 if __name__ == '__main__':
