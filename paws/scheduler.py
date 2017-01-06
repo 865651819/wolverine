@@ -8,7 +8,7 @@ import redis
 import schedule
 
 import settings
-from task_queue import pv, click
+from task_queue import pv, paw
 
 r = redis.StrictRedis(host='localhost', port=6379)
 
@@ -101,14 +101,12 @@ def jobs_per_sec():
     # Generate concrete tasks
     for i in range(1, jobs_to_create):
         if i % 5 == 0:
-            '''
-            click.apply_sync((
+            paw.apply_async((
                 settings.SITE_HOME_PAGE,
                 proxy_candidates[i - 1],
                 proxy_candidates[i - 1],
                 ua_candidates[i - 1])
             )
-            '''
         else:
             pv.apply_async((group[i - 1],
                            proxy_candidates[i - 1],

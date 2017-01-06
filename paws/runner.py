@@ -26,20 +26,26 @@ def construct_pv_cmd(urls, ip, port, user_agent):
     return 'casperjs' + ' ' + PV_PATH + ' ' + ' '.join(urls) + ' ' + construct_args(ip, port, user_agent)
 
 
-def construct_pv_and_click_cmd(urls, ip, port, user_agent):
-    return 'casperjs' + ' ' + PV_CLICK_PATH + ' ' + ' '.join(urls) + ' ' + construct_args(ip, port, user_agent)
+def construct_pv_and_click_cmd(url, ip, port, user_agent):
+    return 'casperjs' + ' ' + PV_CLICK_PATH + ' ' + url + ' ' + construct_args(ip, port, user_agent)
 
 
 def pv():
     global CNT
     CNT += 1
     print CNT
+    return CNT
 
 
 def pv_click():
     global CNT
     CNT += 1
     print CNT
+    return CNT
+
+
+def run():
+    pass
 
 
 if __name__ == '__main__':
