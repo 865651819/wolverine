@@ -4,7 +4,7 @@
 var casper = require("casper").create({
     webSecurityEnabled: false,
     verbose: true,
-    logLevel: "debug"
+    logLevel: "info"
 });
 
 
