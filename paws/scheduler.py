@@ -111,7 +111,7 @@ def jobs_per_sec():
         if JOB_ID > sys.maxint:
             JOB_ID = 0
         if JOB_ID % 5 == 0:
-            print 'COME ON!!!!!'
+            # print 'COME ON!!!!!'
             paw.apply_async((
                 JOB_ID,
                 settings.SITE_HOME_PAGE,

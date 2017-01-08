@@ -61,7 +61,7 @@ function getLinksFromIframes(callback) {
         iframes.forEach(function (index) {
 
             this.withFrame(index, function () {
-                casper.log("Evaluate the iframe : " + this.getCurrentUrl(), 'debug');
+                // casper.log("Evaluate the iframe : " + this.getCurrentUrl(), 'debug');
 
                 // if parent is the ads_page, assuming each iframe means one ads window.
                 if (parent === ads_page) {
@@ -117,7 +117,7 @@ casper.start(ads_page, function () {
 
         // Debugging purpose
         for (var i = 0; i < ads_candidate.length; ++i) {
-            casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
+            // casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
         }
 
         casper.each(ads_candidate, function (self, url) {

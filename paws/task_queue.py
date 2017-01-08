@@ -15,8 +15,8 @@ app = Celery('wolverine', broker='redis://localhost')
 
 @app.task(name='page view')
 def pv(job_id, urls, proxy, useragent):
-    print 'ip ' + proxy
-    logger.info('[' + str(job_id) + '] new pv task')
+    # print 'ip ' + proxy
+    # logger.info('[' + str(job_id) + '] new pv task')
     # cnt = runner.pv()
     try:
         ip_port = proxy.split(':')
@@ -32,8 +32,8 @@ def pv(job_id, urls, proxy, useragent):
 
 @app.task(name='page view with ads click')
 def paw(job_id, url, proxy, useragent):
-    print 'ip ' + proxy
-    logger.info('[' + str(job_id) + '] new click task')
+    # print 'ip ' + proxy
+    # logger.info('[' + str(job_id) + '] new click task')
     # cnt = runner.pv_click()
     try:
         ip_port = proxy.split(':')
