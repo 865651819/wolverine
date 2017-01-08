@@ -19,7 +19,7 @@ def proxy(amount):
         new_proxies = ['localhost1', 'localhost2']
 
         # Reuse new proxies for 5 times
-        reuse = 5
+        reuse = 10
         while reuse > 0:
             reuse -= 1
             for new_proxy in new_proxies:
