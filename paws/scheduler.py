@@ -2,6 +2,7 @@ import datetime
 import json
 import math
 import urllib2
+import sys
 from random import randint
 
 import redis
@@ -38,6 +39,8 @@ ACCESS_PCT = [
     5.45,
     4.6]
 
+JOB_ID = 0
+
 
 def urls_group(amount):
     group = []
@@ -58,7 +61,6 @@ def urls_group(amount):
 
 
 def jobs_per_sec():
-    print 'pv_jobs_per_sec'
 
     # Get current hour of the day
     hour = datetime.datetime.today().hour
@@ -66,9 +68,11 @@ def jobs_per_sec():
     # Get target for current day
     jobs_to_create = 0
     try:
-        jobs_to_create = int(math.ceil((r.get(settings.TASKS_TOTAL) * (ACCESS_PCT[hour] / 100)) / 3600))
-    except:
-        jobs_to_create = 5
+        jobs_to_create = int(math.ceil((int(r.get(settings.TASKS_TOTAL)) * (ACCESS_PCT[hour] / 100)) / 3600))
+    except Exception, error:
+        print str(Exception)
+        print str(error)
+        jobs_to_create = 1
 
     print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
 
@@ -77,7 +81,9 @@ def jobs_per_sec():
     ua_candidates = json.load(urllib2.urlopen(settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
 
     # Get proxy candidates
-    proxy_candidates = json.load(urllib2.urlopen(settings.PROXY_SERVICE_URL + str(jobs_to_create)))
+    rmp = urllib2.urlopen(settings.PROXY_SERVICE_URL).read()
+    proxy_candidates = urllib2.urlopen(settings.PROXY_SERVICE_URL).read().split()
+    # proxy_candidates = json.load(urllib2.urlopen(settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
     # Get url candidates
     group = []
@@ -99,19 +105,25 @@ def jobs_per_sec():
         amount -= 1
 
     # Generate concrete tasks
-    for i in range(1, jobs_to_create):
-        if i % 5 == 0:
+    for i in range(1, jobs_to_create + 1):
+        global JOB_ID
+        JOB_ID += 1
+        if JOB_ID > sys.maxint:
+            JOB_ID = 0
+        if JOB_ID % 5 == 0:
+            print 'COME ON!!!!!'
             paw.apply_async((
+                JOB_ID,
                 settings.SITE_HOME_PAGE,
-                proxy_candidates[i - 1],
                 proxy_candidates[i - 1],
                 ua_candidates[i - 1])
             )
         else:
-            pv.apply_async((group[i - 1],
-                           proxy_candidates[i - 1],
-                           proxy_candidates[i - 1],
-                           ua_candidates[i - 1]))
+            pv.apply_async((
+                JOB_ID,
+                group[i - 1],
+                proxy_candidates[i - 1],
+                ua_candidates[i - 1]))
 
 
 schedule.every(1).seconds.do(jobs_per_sec)

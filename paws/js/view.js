@@ -4,7 +4,7 @@
 var casper = require("casper").create({
     webSecurityEnabled: false,
     verbose: true,
-    logLevel: "debug"
+    logLevel: "info"
 });
 
 casper.userAgent(casper.cli.get('ua'));
@@ -28,7 +28,7 @@ function nextPage() {
         casper.exit();
     }
 
-    casper.log('visit next page ' + urls[INDEX]);
+    //casper.log('visit next page ' + urls[INDEX]);
 
     casper.thenOpen(urls[INDEX], function () {
         INDEX = INDEX + 1;
