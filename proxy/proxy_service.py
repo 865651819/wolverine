@@ -1,5 +1,6 @@
 import Queue
 import json
+import urllib2
 
 import redis
 from flask import Flask
@@ -15,8 +16,8 @@ def proxy(amount):
     # if queue's size is smaller than requested amount, which means we need ask vendor to get more ips
     if q.qsize() < amount:
         # @TODO: use api provided by vendor
-        # new_proxies = urllib2.open('')
-        new_proxies = ['localhost1', 'localhost2']
+        new_proxies = urllib2.open('http://www.httpdaili.com/api.asp?ddbh=2804450698753473&old=1&noinfo=true&sl=50&nm=1').read().split()
+        # new_proxies = ['localhost1', 'localhost2']
 
         # Reuse new proxies for 5 times
         reuse = 10

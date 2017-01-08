@@ -77,13 +77,10 @@ def jobs_per_sec():
     print '[Paw] ' + str(jobs_to_create) + ' jobs to start...'
 
     # Get user agent candidates
-    print settings.USERAGENT_SERVICE_URL + str(jobs_to_create)
     ua_candidates = json.load(urllib2.urlopen(settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
 
     # Get proxy candidates
-    tmp = urllib2.urlopen(settings.PROXY_SERVICE_URL).read()
-    print tmp
-    proxy_candidates = tmp.split()
+    proxy_candidates = json.load(urllib2.urlopen(settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
     if len(proxy_candidates) == 0:
         print 'Proxy error'
