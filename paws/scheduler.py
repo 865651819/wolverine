@@ -82,6 +82,7 @@ def jobs_per_sec():
 
     # Get proxy candidates
     tmp = urllib2.urlopen(settings.PROXY_SERVICE_URL).read()
+    print tmp
     proxy_candidates = tmp.split()
 
     if len(proxy_candidates) == 0:
