@@ -95,6 +95,13 @@ function getLinksFromIframes(callback) {
     });
 }
 
+function getLinks() {
+    var links = document.querySelectorAll('a');
+    return Array.prototype.map.call(links, function(e) {
+        return e.getAttribute('href');
+    });
+}
+
 
 casper.start(ads_page, function () {
     casper.log('Get all ads candidate and click candidates ' + ads_page, "info");
@@ -117,13 +124,46 @@ casper.start(ads_page, function () {
 
         // Debugging purpose
         for (var i = 0; i < ads_candidate.length; ++i) {
-            // casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
+            casper.log('candidate ' + i + ' ' + ads_candidate[i], "info");
         }
 
+        /*
         casper.each(ads_candidate, function (self, url) {
             self.thenOpen(url, function () {
                 casper.log('Clicking the ad ' + url, 'info');
                 casper.log('Second Page: ' + this.getTitle(), "info");
+            });
+        });
+        */
+
+        var billcpc = "bill_cpc";
+        var target = "target";
+
+        var index = Math.floor(Math.random() * (ads_candidate.length));
+        if (index >= ads_candidate.length) {
+            index = 0;
+        }
+
+        this.thenOpen(ads_candidate[index], function() {
+            casper.log('ads index ' + index);
+            casper.log('Clicking the ad ' + ads_candidate[index], 'info');
+            casper.log('Second Page: ' + this.getTitle(), "info");
+            var links_nested = get_links(this);
+            // casper.log(links_nested, "info");
+            for (var i=0; i<links_nested.length; ++i) {
+                // casper.log('link is ' + links_nested[i], "info");
+                if (links_nested[i].indexOf(billcpc) > 0) {
+                    target = links_nested[i];
+                    break;
+                }
+            }
+            if (target === "target") {
+                target = links[0];
+            }
+            casper.log("candidate is " + target, "info");
+            this.thenOpen(target, function() {
+                casper.log('Clicking the searching result ' + target, 'info');
+                casper.log('Third Page: ' + this.getTitle(), "info");
             });
         });
     });

@@ -95,8 +95,8 @@ def jobs_per_sec():
         urls = [settings.SITE_HOME_PAGE]
 
         novel_id = randint(1, 52)
-        chapter_start = randint(1, 70)
-        limit = randint(10, 30)
+        chapter_start = randint(1, 90)
+        limit = randint(5, 10)
 
         counter = 0
 
@@ -113,11 +113,10 @@ def jobs_per_sec():
         JOB_ID += 1
         if JOB_ID > sys.maxint:
             JOB_ID = 0
-        if JOB_ID % 5 == 0:
-            # print 'COME ON!!!!!'
+        if JOB_ID % 4 == 0:
             paw.apply_async((
                 JOB_ID,
-                settings.SITE_HOME_PAGE,
+                settings.SITE_URL.format(str(novel_id), str(chapter_start)),
                 proxy_candidates[i - 1],
                 ua_candidates[i - 1])
             )
