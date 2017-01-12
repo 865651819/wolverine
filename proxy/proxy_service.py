@@ -16,11 +16,11 @@ def proxy(amount):
     # if queue's size is smaller than requested amount, which means we need ask vendor to get more ips
     if q.qsize() < amount:
         # @TODO: use api provided by vendor
-        new_proxies = urllib2.urlopen('http://www.httpdaili.com/api.asp?ddbh=2804450698753473&old=1&noinfo=true&sl=5&nm=1').read().split()
+        new_proxies = urllib2.urlopen('http://www.httpdaili.com/api.asp?ddbh=2999249694863473&old=1&noinfo=true&sl=13&nm=1').read().split()
         # new_proxies = ['localhost1', 'localhost2']
 
         # Reuse new proxies for 5 times
-        reuse = 10
+        reuse = 3
         while reuse > 0:
             reuse -= 1
             for new_proxy in new_proxies:

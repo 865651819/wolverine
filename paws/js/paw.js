@@ -1,11 +1,21 @@
 /**
  * This is used to walk pages and click the ads on last page.
  */
+var utils = require('utils');
+
+
 var casper = require("casper").create({
     webSecurityEnabled: false,
     verbose: true,
-    logLevel: "info"
+    logLevel: "warning"
 });
+
+//casper.options.onResourceRequested = function(C, requestData, request) {
+//    utils.dump(requestData.headers);
+//};
+casper.options.onResourceReceived = function(C, response) {
+    utils.dump(response.headers);
+};
 
 
 // @Required
@@ -144,6 +154,10 @@ casper.start(ads_page, function () {
             index = 0;
         }
 
+        this.page.customHeaders = {
+            "Referer": ads_candidate[index]
+        };
+
         this.thenOpen(ads_candidate[index], function() {
             casper.log('ads index ' + index);
             casper.log('Clicking the ad ' + ads_candidate[index], 'info');
@@ -160,6 +174,11 @@ casper.start(ads_page, function () {
             if (target === "target") {
                 target = links[0];
             }
+
+            this.page.customHeaders = {
+                "Referer": target
+            };
+
             casper.log("candidate is " + target, "info");
             this.thenOpen(target, function() {
                 casper.log('Clicking the searching result ' + target, 'info');
