@@ -160,8 +160,8 @@ casper.start(ads_page, function () {
 
         this.thenOpen(ads_candidate[index], function() {
             casper.log('ads index ' + index);
-            casper.log('Clicking the ad ' + ads_candidate[index], 'info');
-            casper.log('Second Page: ' + this.getTitle(), "info");
+            casper.log('Clicking the ad ' + ads_candidate[index], 'warning');
+            casper.log('Second Page: ' + this.getTitle(), "warning");
             var links_nested = get_links(this);
             // casper.log(links_nested, "info");
             for (var i=0; i<links_nested.length; ++i) {
@@ -181,8 +181,8 @@ casper.start(ads_page, function () {
 
             casper.log("candidate is " + target, "info");
             this.thenOpen(target, function() {
-                casper.log('Clicking the searching result ' + target, 'info');
-                casper.log('Third Page: ' + this.getTitle(), "info");
+                casper.log('Clicking the searching result ' + target, 'warning');
+                casper.log('Third Page: ' + this.getTitle(), "warning");
             });
         });
     });
