@@ -81,11 +81,13 @@ def jobs_per_sec():
     ua_candidates = json.load(urllib2.urlopen(settings.USERAGENT_SERVICE_URL + str(jobs_to_create)))
 
     # Get proxy candidates
-    proxy_candidates = json.load(urllib2.urlopen("http://localhost:5002/proxy"))
+    proxy_candidates = urllib2.urlopen('http://114.55.65.167:8888/api.asp?ddbh=yh001&noinfo=true&sl=11&text=true').read().split()
 
     if len(proxy_candidates) == 0:
         print 'Proxy error'
         return
+    for new_proxy in proxy_candidates:
+        print new_proxy
     # proxy_candidates = json.load(urllib2.urlopen(settings.PROXY_SERVICE_URL + str(jobs_to_create)))
 
     # Get url candidates

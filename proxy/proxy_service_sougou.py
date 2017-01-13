@@ -24,6 +24,13 @@ def proxy():
     return json.dumps(proxies)
 
 
+@app.before_first_request
+def init():
+    schedule.every(3).minutes.do(fetch_new_proxies)
+    while 1:
+        schedule.run_pending()
+
+
 def fetch_new_proxies():
     new_proxies = urllib2.urlopen('http://114.55.65.167:8888/api.asp?ddbh=yh001&noinfo=true&sl=11&text=true').read().split()
     print 'Fetch new proxies'
@@ -31,10 +38,6 @@ def fetch_new_proxies():
         print new_proxy
         q.put(new_proxy)
 
-schedule.every(3).minutes.do(fetch_new_proxies)
-
-while 1:
-    schedule.run_pending()
 
 if __name__ == "__main__":
     proxy_service.run(host='localhost', port=5002)
