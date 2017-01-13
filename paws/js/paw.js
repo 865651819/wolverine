@@ -7,7 +7,7 @@ var utils = require('utils');
 var casper = require("casper").create({
     webSecurityEnabled: false,
     verbose: true,
-    logLevel: "warning"
+    logLevel: "info"
 });
 
 //casper.options.onResourceRequested = function(C, requestData, request) {
