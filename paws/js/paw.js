@@ -13,10 +13,28 @@ var casper = require("casper").create({
 //casper.options.onResourceRequested = function(C, requestData, request) {
 //    utils.dump(requestData.headers);
 //};
-casper.options.onResourceReceived = function(C, response) {
-    utils.dump(response.headers);
-};
+//casper.options.onResourceReceived = function(C, response) {
+//    utils.dump(response.headers);
+//};
 
+casper.options.onResourceRequested = function(C, requestData, request) {
+    if ((/https?:\/\/.+?\.css/gi).test(requestData['url']) || requestData['Content-Type'] == 'text/css') {
+        console.log('Skipping CSS file: ' + requestData['url']);
+        request.abort();
+    }
+}
+
+function getRandomInt() {
+    return Math.floor(Math.random() * (10000 - 3000)) + 3000;
+}
+
+function getSeconds(min, max) {
+    return Math.floor(Math.random() * (max * 1000 - min * 1000)) + min * 1000;
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 // @Required
 // Set user agent by passing argument --ua
@@ -158,31 +176,84 @@ casper.start(ads_page, function () {
             "Referer": ads_candidate[index]
         };
 
-        this.thenOpen(ads_candidate[index], function() {
-            casper.log('ads index ' + index);
-            casper.log('Clicking the ad ' + ads_candidate[index], 'warning');
-            casper.log('Second Page: ' + this.getTitle(), "warning");
-            var links_nested = get_links(this);
-            // casper.log(links_nested, "info");
-            for (var i=0; i<links_nested.length; ++i) {
-                // casper.log('link is ' + links_nested[i], "info");
-                if (links_nested[i].indexOf(billcpc) > 0) {
-                    target = links_nested[i];
-                    break;
+
+        var page_wait = getSeconds(5, 10);
+        console.log('wait on the page ' + page_wait, 'warning');
+        this.wait(page_wait, function() {
+            this.thenOpen(ads_candidate[index], function() {
+                casper.log('ads index ' + index);
+                casper.log('Clicking the ad ' + ads_candidate[index], 'warning');
+                casper.log('Second Page: ' + this.getTitle(), "warning");
+                var links_nested = get_links(this);
+                // casper.log(links_nested, "info");
+                for (var i=0; i<links_nested.length; ++i) {
+                    // casper.log('link is ' + links_nested[i], "info");
+                    if (links_nested[i].indexOf(billcpc) > 0) {
+                        target = links_nested[i];
+                        break;
+                    }
                 }
-            }
-            if (target === "target") {
-                target = links[0];
-            }
+                if (target === "target") {
+                    target = links[0];
+                }
 
-            this.page.customHeaders = {
-                "Referer": target
-            };
+                this.page.customHeaders = {
+                    "Referer": target
+                };
 
-            casper.log("candidate is " + target, "info");
-            this.thenOpen(target, function() {
-                casper.log('Clicking the searching result ' + target, 'warning');
-                casper.log('Third Page: ' + this.getTitle(), "warning");
+                casper.log("candidate is " + target, "info");
+                var sougou_search_wait = getSeconds(5, 10);
+                casper.log('wait on sougou searching ' + sougou_search_wait, 'warning');
+
+                casper.wait(sougou_search_wait, function() {
+                    casper.thenOpen(target, function() {
+                        casper.log('Clicking the searching result ' + target, 'warning');
+                        casper.log('Third Page: ' + this.getTitle(), "warning");
+
+                        var customer_wait = getSeconds(10, 60);
+                        casper.log('wait on customer ' + customer_wait, 'warning');
+
+                        var links_customer = get_links(this);
+
+                        /*
+                        var links_candidate = [];
+                        for (var j=0; j<links_customer.length; ++j) {
+                            casper.log('child link ' + links_customer[j], 'warning');
+                            if (links_customer[j].indexOf("html")>0
+                                || (links_customer[j].indexOf("htm")>0)
+                                || (links_customer[j].indexOf('jpg') <= 0)) {
+                                links_candidate.push(links_customer[j]);
+                                casper.log('Found ', 'warning');
+                            }
+                        }
+                        var t = -1;
+                        if (links_customer) {
+                            t = getRandomInt(0, links_candidate.length);
+                        }
+
+                        var new_referer = this.getCurrentUrl();
+                        casper.log('customer page ' + new_referer, 'warning');
+                        this.page.customHeaders = {
+                            "Referer": new_referer
+                        };
+                        */
+                        casper.wait(customer_wait, function() {
+                            casper.log('customer waiting is done');
+                            /*
+                            if (t !== -1) {
+                                casper.thenOpen(links_candidate[t], function() {
+                                    casper.log('wait on customer second level ' + customer_wait);
+                                    casper.log('child page ' + this.getCurrentUrl());
+                                    var next_wait = getSeconds(5, 15);
+                                    this.wait(next_wait, function() {});
+                                });
+                            } else {
+                                casper.log('cannot find nested link ', 'warning');
+                            }
+                            */
+                        });
+                    });
+                });
             });
         });
     });

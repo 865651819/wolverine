@@ -115,7 +115,7 @@ def jobs_per_sec():
         JOB_ID += 1
         if JOB_ID > sys.maxint:
             JOB_ID = 1
-        if i == 1 or i == jobs_to_create:
+        if i == 1 or i == 2 or i == jobs_to_create:
             print 'new click job ' + str(JOB_ID)
             paw.apply_async((
                 JOB_ID,
